@@ -1,0 +1,16 @@
+# Python virtual environment
+.venv/
+
+# Python bytecode cache
+__pycache__/
+*.pyc
+
+# Application cache (e.g. Yahoo Finance CSV files)
+cache/
+.cache/
+
+# IDE / editor files
+.idea/
+
+# macOS system files
+.DS_Store
