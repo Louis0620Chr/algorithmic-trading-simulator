@@ -3,7 +3,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Final, Literal
-
 import pandas as pd
 
 _REQUIRED_MARKET_DATA_COLUMNS: Final[tuple[str, ...]] = (
