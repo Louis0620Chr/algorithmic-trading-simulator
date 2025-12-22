@@ -35,14 +35,10 @@ def run_grid_search(
     ema_cache = vbt.MA.run(training_close, window=all_ema_periods, ewm=True)
 
     grid_search_results = []
-    years = max(
-        (training_close.index[-1] - training_close.index[0]).days / 365.25, 1e-9
-    )
 
     for batch_start in range(0, total_combinations, batch_size):
         batch_end = min(batch_start + batch_size, total_combinations)
         batch_combinations = ema_combinations[batch_start:batch_end]
-        batch_length = len(batch_combinations)
 
         batch_entries = []
         batch_exits = []
