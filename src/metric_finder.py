@@ -1,6 +1,5 @@
 from typing import List, Tuple
 
-import numpy as np
 import pandas as pd
 import vectorbt as vbt
 
@@ -25,8 +24,7 @@ def run_grid_search(
     training_close: pd.Series, ema_combinations: List[Tuple[int, int, int]], config: Config
 ) -> pd.DataFrame:
     if not ema_combinations:
-        empty_results = pd.DataFrame()
-        return empty_results
+        return pd.DataFrame()
 
     batch_size = config.batch_size
     total_combinations = len(ema_combinations)
@@ -44,95 +42,57 @@ def run_grid_search(
         batch_exits = []
 
         for fast_ema_period, medium_ema_period, slow_ema_period in batch_combinations:
-            try:
-                fast_ema = pd.Series(
-                    ema_cache.ma[fast_ema_period].values.flatten(),
-                    index=training_close.index,
-                )
-                medium_ema = pd.Series(
-                    ema_cache.ma[medium_ema_period].values.flatten(),
-                    index=training_close.index,
-                )
-                slow_ema = pd.Series(
-                    ema_cache.ma[slow_ema_period].values.flatten(),
-                    index=training_close.index,
-                )
+            fast_ema = ema_cache.ma[fast_ema_period]
+            medium_ema = ema_cache.ma[medium_ema_period]
+            slow_ema = ema_cache.ma[slow_ema_period]
 
-                entries_raw = (
-                    fast_ema.vbt.crossed_above(medium_ema)
-                    | fast_ema.vbt.crossed_above(slow_ema)
-                    | medium_ema.vbt.crossed_above(slow_ema)
-                )
-                exits_raw = (
-                    fast_ema.vbt.crossed_below(medium_ema)
-                    | fast_ema.vbt.crossed_below(slow_ema)
-                    | medium_ema.vbt.crossed_below(slow_ema)
-                )
-
-                # Shift signals to avoid lookahead bias
-                entries_shifted = entries_raw.shift(1)
-                entries = pd.Series(
-                    np.where(entries_shifted.isna(), False, entries_shifted),
-                    index=training_close.index,
-                    dtype=bool,
-                )
-
-                exits_shifted = exits_raw.shift(1)
-                exits = pd.Series(
-                    np.where(exits_shifted.isna(), False, exits_shifted),
-                    index=training_close.index,
-                    dtype=bool,
-                )
-
-                batch_entries.append(entries)
-                batch_exits.append(exits)
-            except Exception:
-                batch_entries.append(
-                    pd.Series(False, index=training_close.index, dtype=bool)
-                )
-                batch_exits.append(
-                    pd.Series(False, index=training_close.index, dtype=bool)
-                )
-                pass
-
-        entries_dataframe = pd.DataFrame(batch_entries).T
-        exits_dataframe = pd.DataFrame(batch_exits).T
-
-        try:
-            portfolios = vbt.Portfolio.from_signals(
-                close=training_close,
-                entries=entries_dataframe,
-                exits=exits_dataframe,
-                init_cash=config.initial_cash,
-                fees=config.fees,
-                slippage=config.slippage,
-                freq=config.frequency,
+            entries_raw = (
+                fast_ema.vbt.crossed_above(medium_ema)
+                | fast_ema.vbt.crossed_above(slow_ema)
+                | medium_ema.vbt.crossed_above(slow_ema)
             )
-        except Exception:
-            pass
-            continue
+            exits_raw = (
+                fast_ema.vbt.crossed_below(medium_ema)
+                | fast_ema.vbt.crossed_below(slow_ema)
+                | medium_ema.vbt.crossed_below(slow_ema)
+            )
+
+            # Shift signals to avoid lookahead bias
+            entries = entries_raw.shift(1).fillna(False).astype(bool)
+            exits = exits_raw.shift(1).fillna(False).astype(bool)
+
+            batch_entries.append(entries)
+            batch_exits.append(exits)
+
+        entries_dataframe = pd.concat(batch_entries, axis=1)
+        exits_dataframe = pd.concat(batch_exits, axis=1)
+
+        portfolios = vbt.Portfolio.from_signals(
+            close=training_close,
+            entries=entries_dataframe,
+            exits=exits_dataframe,
+            init_cash=config.initial_cash,
+            fees=config.fees,
+            slippage=config.slippage,
+            freq=config.frequency,
+        )
 
         sharpe_ratios = portfolios.sharpe_ratio(freq=config.frequency)
 
         for index, (fast_ema_period, medium_ema_period, slow_ema_period) in enumerate(
             batch_combinations
         ):
-            try:
-                sharpe_ratio = float(
-                    sharpe_ratios.iloc[index]
-                    if hasattr(sharpe_ratios, "iloc")
-                    else sharpe_ratios
-                )
-                grid_search_results.append(
-                    {
-                        "fast_ema_period": fast_ema_period,
-                        "medium_ema_period": medium_ema_period,
-                        "slow_ema_period": slow_ema_period,
-                        "sharpe_ratio": sharpe_ratio,
-                    }
-                )
-            except Exception:
-                pass
+            sharpe_ratio = float(
+                sharpe_ratios.iloc[index] if hasattr(sharpe_ratios, "iloc") else sharpe_ratios
+            )
+            grid_search_results.append(
+                {
+                    "fast_ema_period": fast_ema_period,
+                    "medium_ema_period": medium_ema_period,
+                    "slow_ema_period": slow_ema_period,
+                    "sharpe_ratio": sharpe_ratio,
+                }
+            )
 
     results_dataframe = pd.DataFrame(grid_search_results)
     return results_dataframe
