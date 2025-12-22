@@ -1,4 +1,7 @@
-pandas
-numpy
-matplotlib
-yfinance
+numpy==1.26.4
+pandas==2.2.2
+yfinance==0.2.55
+matplotlib==3.8.4
+vectorbt==0.28.2
+numba==0.58.1 ; python_version < "3.12"
+llvmlite==0.41.1 ; python_version < "3.12"
