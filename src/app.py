@@ -30,7 +30,6 @@ def main():
     fast_period = int(best_result["fast_ema_period"])
     medium_period = int(best_result["medium_ema_period"])
     slow_period = int(best_result["slow_ema_period"])
-    print(fast_period, medium_period, slow_period)
 
 if __name__ == "__main__":
     main()
