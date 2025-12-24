@@ -88,7 +88,7 @@ def compute_metrics(portfolio, config: Config) -> dict:
         if trade_returns.size > 0:
             win_rate = (trade_returns > 0).sum() / len(trade_returns)
 
-    return {
+    metrics = {
         "total_return": total_return,
         "annualized_return": annualized_return,
         "sharpe_ratio": sharpe_ratio,
@@ -96,6 +96,12 @@ def compute_metrics(portfolio, config: Config) -> dict:
         "volatility": volatility,
         "win_rate": win_rate,
     }
+    return metrics
 
 def _extract_trade_returns(trades):
-    return trades.returns.values if hasattr(trades.returns, "values") else numpy.array(trades.returns)
+    trade_returns = (
+        trades.returns.values
+        if hasattr(trades.returns, "values")
+        else numpy.array(trades.returns)
+    )
+    return trade_returns
