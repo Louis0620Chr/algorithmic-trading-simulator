@@ -1,6 +1,8 @@
 from config import Config
 from data import load_stock_data, select_close_series
 from metric_finder import build_ema_combinations, run_grid_search
+from backtest import build_ema_signals, run_portfolio_backtest, compute_metrics
+from visualization import plot_best_strategy
 
 def main():
     config = Config()
@@ -30,6 +32,33 @@ def main():
     fast_period = int(best_result["fast_ema_period"])
     medium_period = int(best_result["medium_ema_period"])
     slow_period = int(best_result["slow_ema_period"])
+
+    (
+        fast_ema_series,
+        medium_ema_series,
+        slow_ema_series,
+        entry_signals,
+        exit_signals,
+    ) = build_ema_signals(close, fast_period, medium_period, slow_period)
+
+    full_sample_portfolio = run_portfolio_backtest(
+        close, entry_signals, exit_signals, config
+    )
+
+    performance_metrics = compute_metrics(full_sample_portfolio, config)
+
+    plot_best_strategy(
+        close_price_series=close,
+        fast_period=fast_period,
+        medium_period=medium_period,
+        slow_period=slow_period,
+        fast_ema_series=fast_ema_series,
+        medium_ema_series=medium_ema_series,
+        slow_ema_series=slow_ema_series,
+        entry_signals=entry_signals,
+        exit_signals=exit_signals,
+        performance_metrics=performance_metrics,
+    )
 
 if __name__ == "__main__":
     main()
