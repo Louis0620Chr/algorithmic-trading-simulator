@@ -110,14 +110,6 @@ This allows experimentation without modifying the core logic.
 
 ---
 
-## Notes
-
-- This project is intended for research and educational purposes
-- It is not financial advice
-- Performance on historical data does not guarantee future results
-
----
-
 ## Summary
 
 This project demonstrates:
@@ -125,5 +117,3 @@ This project demonstrates:
 - Parameter optimization via grid search
 - Full-sample strategy evaluation
 - A reproducible backtesting workflow
-
-It is suitable as a software craftsmanship, quantitative trading, or backtesting architecture example.
