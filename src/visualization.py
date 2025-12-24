@@ -34,3 +34,19 @@ def plot_best_strategy(
         linewidth=1.5,
         alpha=0.7,
     )
+
+    moving_average_plot_definitions = [
+        ("Fast Exponential Moving Average", fast_ema_series, fast_period, "blue"),
+        ("Medium Exponential Moving Average", medium_ema_series, medium_period, "orange"),
+        ("Slow Exponential Moving Average", slow_ema_series, slow_period, "purple"),
+    ]
+
+    for label_prefix, moving_average_series, period, line_color in moving_average_plot_definitions:
+        ax.plot(
+            moving_average_series.index,
+            moving_average_series.values,
+            label=f"{label_prefix} ({period})",
+            color=line_color,
+            alpha=0.8,
+            linewidth=1.2,
+        )
