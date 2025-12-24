@@ -6,6 +6,10 @@ from config import Config
 
 
 def build_ema_signals(close_price_series, fast_period: int, medium_period: int, slow_period: int):
+    """
+    Compute fast, medium and slow exponential moving averages and derive
+    corresponding buy and sell signals based on EMA crossovers.
+    """
     fast_ema_series = vectorbt.MA.run(close_price_series, fast_period, ewm=True).ma
     medium_ema_series = vectorbt.MA.run(close_price_series, medium_period, ewm=True).ma
     slow_ema_series = vectorbt.MA.run(close_price_series, slow_period, ewm=True).ma
@@ -19,16 +23,22 @@ def build_ema_signals(close_price_series, fast_period: int, medium_period: int, 
 
     return (fast_ema_series, medium_ema_series, slow_ema_series, entry_signals, exit_signals)
 
-
 def shift_and_align_signals(raw_signals, price_index):
+    """
+    Shift signals by one bar to avoid look-ahead bias and align them
+    to the price index used for backtesting.
+    """
     shifted_signals = raw_signals.shift(1)
     boolean_signals = shifted_signals.astype("boolean")
     filled_signals = boolean_signals.fillna(False)
     aligned_signals = filled_signals.reindex(price_index).astype("boolean").fillna(False)
     return aligned_signals.to_numpy(dtype=bool)
 
-
 def build_buy_and_sell_signals(fast_ema_series, medium_ema_series, slow_ema_series, price_index):
+    """
+    Define entry and exit conditions using EMA crossover logic.
+    Multiple crossover combinations are allowed to trigger signals.
+    """
     fast_crosses_above_medium = fast_ema_series.vbt.crossed_above(medium_ema_series)
     fast_crosses_above_slow = fast_ema_series.vbt.crossed_above(slow_ema_series)
     medium_crosses_above_slow = medium_ema_series.vbt.crossed_above(slow_ema_series)
@@ -45,8 +55,11 @@ def build_buy_and_sell_signals(fast_ema_series, medium_ema_series, slow_ema_seri
     exit_signals_series = pandas.Series(exit_signals, index=price_index, dtype=bool)
     return entry_signals_series, exit_signals_series
 
-
 def run_portfolio_backtest(close_price_series, entry_signals, exit_signals, config: Config):
+    """
+    Execute a VectorBT signal-based portfolio backtest using
+    predefined trading costs and capital settings.
+    """
     return vectorbt.Portfolio.from_signals(
         close=close_price_series.to_numpy(dtype=float),
         entries=entry_signals.to_numpy(dtype=bool),
@@ -57,8 +70,10 @@ def run_portfolio_backtest(close_price_series, entry_signals, exit_signals, conf
         freq=config.data_frequency,
     )
 
-
 def compute_metrics(portfolio, config: Config) -> dict:
+    """
+    Compute key performance metrics for strategy evaluation.
+    """
     total_return = float(portfolio.total_return())
     annualized_return = float(portfolio.annualized_return(freq=config.data_frequency))
     sharpe_ratio = float(portfolio.sharpe_ratio(freq=config.data_frequency))
@@ -80,7 +95,6 @@ def compute_metrics(portfolio, config: Config) -> dict:
         "volatility": volatility,
         "win_rate": win_rate,
     }
-
 
 def _extract_trade_returns(trades):
     return trades.returns.values if hasattr(trades.returns, "values") else numpy.array(trades.returns)
