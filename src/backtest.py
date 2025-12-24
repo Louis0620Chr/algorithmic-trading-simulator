@@ -60,7 +60,7 @@ def run_portfolio_backtest(close_price_series, entry_signals, exit_signals, conf
     Execute a VectorBT signal-based portfolio backtest using
     predefined trading costs and capital settings.
     """
-    return vectorbt.Portfolio.from_signals(
+    portfolio = vectorbt.Portfolio.from_signals(
         close=close_price_series.to_numpy(dtype=float),
         entries=entry_signals.to_numpy(dtype=bool),
         exits=exit_signals.to_numpy(dtype=bool),
@@ -69,6 +69,7 @@ def run_portfolio_backtest(close_price_series, entry_signals, exit_signals, conf
         slippage=config.slippage_rate,
         freq=config.data_frequency,
     )
+    return portfolio
 
 def compute_metrics(portfolio, config: Config) -> dict:
     """
@@ -98,4 +99,3 @@ def compute_metrics(portfolio, config: Config) -> dict:
 
 def _extract_trade_returns(trades):
     return trades.returns.values if hasattr(trades.returns, "values") else numpy.array(trades.returns)
-
