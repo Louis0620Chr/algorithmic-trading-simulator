@@ -7,13 +7,14 @@ from config import Config
 
 
 def build_ema_combinations(fast_ema_periods: List[int], medium_ema_periods: List[int], slow_ema_periods: List[int]) -> List[Tuple[int, int, int]]:
-    return [
+    valid_combinations = [
         (fast_period, medium_period, slow_period)
         for fast_period in fast_ema_periods
         for medium_period in medium_ema_periods
         for slow_period in slow_ema_periods
         if fast_period < medium_period and fast_period < slow_period
     ]
+    return valid_combinations
 
 
 def run_grid_search(training_close_prices: pandas.Series, ema_combinations: List[Tuple[int, int, int]], config: Config) -> pandas.DataFrame:

@@ -3,15 +3,21 @@ import numpy
 
 
 def _format_percentage(value: float) -> str:
+    formatted_value = "n/a"
     if value is None or numpy.isnan(value):
-        return "n/a"
-    return "{:.2f}%".format(value * 100.0)
+        formatted_value = "n/a"
+    else:
+        formatted_value = "{:.2f}%".format(value * 100.0)
+    return formatted_value
 
 
 def _format_number(value: float) -> str:
+    formatted_value = "n/a"
     if value is None or numpy.isnan(value):
-        return "n/a"
-    return "{:.2f}".format(value)
+        formatted_value = "n/a"
+    else:
+        formatted_value = "{:.2f}".format(value)
+    return formatted_value
 
 def plot_best_strategy(
     close_price_series,
