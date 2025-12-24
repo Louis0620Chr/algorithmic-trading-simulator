@@ -50,3 +50,20 @@ def plot_best_strategy(
             alpha=0.8,
             linewidth=1.2,
         )
+
+    signal_plot_definitions = [
+        ("Buy", entry_signals, "^", "green"),
+        ("Sell", exit_signals, "v", "red"),
+    ]
+
+    for signal_label, signal_mask, marker_style, marker_color in signal_plot_definitions:
+        signal_index = close_price_series.index[signal_mask]
+        ax.scatter(
+            signal_index,
+            close_price_series.reindex(signal_index).values,
+            marker=marker_style,
+            color=marker_color,
+            s=80,
+            label=signal_label,
+            zorder=5,
+        )
