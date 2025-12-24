@@ -69,13 +69,6 @@ python -m venv .venv
 macOS / Linux:
 
 source .venv/bin/activate
-<<<<<<< HEAD
-python -m pip install -r requirements.txt
-
-Run the app from the repo root:
-
-python app.py
-=======
 
 Windows:
 
@@ -134,4 +127,3 @@ This project demonstrates:
 - A reproducible backtesting workflow
 
 It is suitable as a software craftsmanship, quantitative trading, or backtesting architecture example.
->>>>>>> 745ec118924f5727879b1d22dcbe8217983fc9f4
