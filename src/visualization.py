@@ -67,3 +67,46 @@ def plot_best_strategy(
             label=signal_label,
             zorder=5,
         )
+
+    metric_labels = [
+        "Total Return",
+        "Annualized Return",
+        "Sharpe Ratio",
+        "Maximum Drawdown",
+        "Volatility",
+        "Win Rate",
+    ]
+
+    metric_values = [
+        _format_percentage(performance_metrics.get("total_return")),
+        _format_percentage(performance_metrics.get("annualized_return")),
+        _format_number(performance_metrics.get("sharpe_ratio")),
+        _format_percentage(performance_metrics.get("maximum_drawdown")),
+        _format_percentage(performance_metrics.get("volatility")),
+        _format_percentage(performance_metrics.get("win_rate")),
+    ]
+
+    cell_text = [[label, value] for label, value in zip(metric_labels, metric_values)]
+
+    table = ax.table(
+        cellText=cell_text,
+        colLabels=["Metric", "Value"],
+        loc="lower right",
+        bbox=[0.68, 0.02, 0.3, 0.25],
+    )
+    table.auto_set_font_size(False)
+    table.set_fontsize(9)
+
+    ax.set_title(
+        "Best Triple Exponential Moving Average({},{},{}) - Full Sample Signals".format(
+            fast_period, medium_period, slow_period
+        ),
+        fontsize=14,
+        fontweight="bold",
+    )
+    ax.set_xlabel("Date", fontsize=12)
+    ax.set_ylabel("Price", fontsize=12)
+    ax.grid(True, alpha=0.3)
+    ax.legend(loc="best")
+    plt.tight_layout()
+    plt.show()
